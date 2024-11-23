@@ -192,7 +192,7 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
     private void setupSpinners() {
         ArrayAdapter<CharSequence> statusAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item,
-                new String[]{"All", "yet-to-start", "in-progress", "completed"});
+                new String[]{"All", "yet-to-start", "in-progress", "completed", "hold"});
         statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         statusSpinner.setAdapter(statusAdapter);
 
