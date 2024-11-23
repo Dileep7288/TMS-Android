@@ -16,16 +16,33 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Dashboard Title -->
-            <TextView
-                android:id="@+id/dashboard_title"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Dashboard"
-                android:textSize="24sp"
-                android:textColor="#333"
-                android:textStyle="bold"
-                android:layout_marginBottom="16dp"/>
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="16dp">
+
+                <TextView
+                    android:id="@+id/dashboard_title"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Dashboard"
+                    android:textSize="24sp"
+                    android:textColor="#333"
+                    android:textStyle="bold"/>
+
+                <ImageButton
+                    android:id="@+id/logout_button"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_logout"
+                    android:contentDescription="Logout"
+                    android:padding="12dp"
+                    app:tint="#FF5722"/>
+            </LinearLayout>
 
             <!-- Task Statistics: Total Tasks, Completed Tasks -->
             <LinearLayout

@@ -38,6 +38,9 @@ import android.content.Intent;
 import android.widget.EditText;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
+import android.app.AlertDialog;
+import android.widget.ImageButton;
+
 public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.OnTaskActionListener{
     private TextView totalTasksTextView;
     private TextView completedTasksTextView;
@@ -62,13 +65,17 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
 
     private RecyclerView tasksRecyclerView;
     private TaskAdapter taskAdapter;
-
     private FloatingActionButton fabAddTask;
+
+    private ImageButton logoutButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
+
+        logoutButton = findViewById(R.id.logout_button);
+        logoutButton.setOnClickListener(v -> showLogoutConfirmation());
 
         displayDateFormat = new SimpleDateFormat(DATE_FORMAT_DISPLAY, Locale.getDefault());
         apiDateFormat = new SimpleDateFormat(DATE_FORMAT_API, Locale.getDefault());
@@ -82,6 +89,63 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
         fetchTasksFromServer();
     }
 
+    private void showLogoutConfirmation() {
+        new AlertDialog.Builder(this)
+                .setTitle("Logout")
+                .setMessage("Are you sure you want to logout?")
+                .setPositiveButton("Yes", (dialog, which) -> performLogout())
+                .setNegativeButton("No", null)
+                .show();
+    }
+
+    private void performLogout() {
+        new Thread(() -> {
+            HttpURLConnection connection = null;
+            try {
+                URL url = new URL("http://172.16.20.76:8000/api/logout/");
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty("Authorization", "Bearer " + getAccessToken());
+
+                int responseCode = connection.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_OK ||
+                        responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
+
+                    // Clear stored tokens
+                    SharedPreferences sharedPreferences =
+                            getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    editor.remove("access_token");
+                    editor.remove("refresh_token");
+                    editor.apply();
+
+                    runOnUiThread(() -> {
+                        Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
+                        // Navigate to MainActivity
+                        Intent intent = new Intent(this, MainActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        finish();
+                    });
+                } else {
+                    runOnUiThread(() ->
+                            Toast.makeText(this, "Logout failed. Please try again.",
+                                    Toast.LENGTH_SHORT).show()
+                    );
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                runOnUiThread(() ->
+                        Toast.makeText(this, "Error during logout: " + e.getMessage(),
+                                Toast.LENGTH_SHORT).show()
+                );
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
+            }
+        }).start();
+    }
     private void setupFab() {
         fabAddTask = findViewById(R.id.fab_add_task);
         fabAddTask.setOnClickListener(v -> {

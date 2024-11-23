@@ -30,12 +30,12 @@
         <!-- LoginActivity declaration -->
         <activity
             android:name=".LoginActivity"
-            android:exported="true" />
+            android:exported="false" />
 
         <!-- RegistrationActivity declaration -->
         <activity
             android:name=".RegistrationActivity"
-            android:exported="true" />
+            android:exported="false" />
 
         <activity android:name=".DashBoardActivity"/>
 
