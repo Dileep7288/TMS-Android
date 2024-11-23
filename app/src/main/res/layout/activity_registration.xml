@@ -84,26 +84,5 @@
             android:textSize="18sp"
             android:textStyle="bold"
             android:layout_marginBottom="16dp"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Already have an account? "
-                android:textColor="@color/black"/>
-
-            <TextView
-                android:id="@+id/login_redirect_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Login"
-                android:textStyle="bold"
-                android:textColor="@color/primary_color"/>
-        </LinearLayout>
     </LinearLayout>
 </RelativeLayout>
