@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- Dashboard Title -->
+            <TextView
+                android:id="@+id/dashboard_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Dashboard"
+                android:textSize="24sp"
+                android:textColor="#333"
+                android:textStyle="bold"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- Task Statistics: Total Tasks, Completed Tasks -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="2"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp">
+
+                <!-- Total Tasks -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:padding="16dp"
+                    android:background="#F0F0F0"
+                    android:elevation="4dp"
+                    android:layout_marginEnd="8dp">
+
+                    <TextView
+                        android:id="@+id/total_tasks"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Total Tasks"
+                        android:textSize="16sp"
+                        android:textColor="#555"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:id="@+id/total_task_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="32sp"
+                        android:textColor="#333"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+
+                <!-- Completed Tasks -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:padding="16dp"
+                    android:background="#E1F5E5"
+                    android:elevation="4dp">
+
+                    <TextView
+                        android:id="@+id/completed_tasks"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Completed Tasks"
+                        android:textSize="16sp"
+                        android:textColor="#555"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:id="@+id/completed_task_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="32sp"
+                        android:textColor="#388E3C"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Task Statistics: Pending Tasks and Priority Tasks -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="2"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp">
+
+                <!-- Pending Tasks -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:padding="16dp"
+                    android:background="#FFEBEE"
+                    android:elevation="4dp"
+                    android:layout_marginEnd="8dp">
+
+                    <TextView
+                        android:id="@+id/pending_tasks"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pending Tasks"
+                        android:textSize="16sp"
+                        android:textColor="#555"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:id="@+id/pending_task_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="32sp"
+                        android:textColor="#D32F2F"
+                        android:textStyle="bold"/>
+                </LinearLayout>
+
+                <!-- Tasks by Priority -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:padding="16dp"
+                    android:background="#FFF8E1"
+                    android:elevation="4dp">
+
+                    <TextView
+                        android:id="@+id/tasks_by_priority"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tasks by Priority"
+                        android:textSize="16sp"
+                        android:textColor="#555"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:id="@+id/priority_task_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Low: 0, Medium: 0, High: 0"
+                        android:textSize="16sp"
+                        android:textColor="#333"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Filters Section -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Filter Tasks"
+                android:textSize="20sp"
+                android:textColor="#333"
+                android:textStyle="bold"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="16dp"/>
+
+            <!-- Status Filter -->
+            <Spinner
+                android:id="@+id/status_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:padding="12dp"
+                android:background="@android:drawable/btn_dropdown"
+                android:spinnerMode="dropdown"/>
+
+            <!-- Priority Filter -->
+            <Spinner
+                android:id="@+id/priority_spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp"
+                android:padding="12dp"
+                android:background="@android:drawable/btn_dropdown"
+                android:spinnerMode="dropdown"/>
+
+            <!-- Date Range Filter -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="2"
+                android:layout_marginBottom="16dp">
+
+                <!-- Start Date -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:layout_marginEnd="8dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Start Date"
+                        android:textSize="14sp"
+                        android:textColor="#555"/>
+
+                    <TextView
+                        android:id="@+id/start_date_picker"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:text="Select Start Date"
+                        android:textSize="14sp"
+                        android:padding="12dp"
+                        android:background="@drawable/date_picker_background"
+                        android:textColor="@android:color/black"
+                        android:gravity="center_vertical|start"/>
+                </LinearLayout>
+
+                <!-- End Date -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="End Date"
+                        android:textSize="14sp"
+                        android:textColor="#555"/>
+
+                    <TextView
+                        android:id="@+id/end_date_picker"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:text="Select End Date"
+                        android:textSize="14sp"
+                        android:padding="12dp"
+                        android:background="@drawable/date_picker_background"
+                        android:textColor="@android:color/black"
+                        android:gravity="center_vertical|start"/>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Filter Buttons -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="2"
+                android:layout_marginBottom="16dp">
+
+                <Button
+                    android:id="@+id/apply_filters"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginEnd="8dp"
+                    android:text="Apply Filters"
+                    android:textColor="#FFF"
+                    android:backgroundTint="#4CAF50"/>
+
+                <Button
+                    android:id="@+id/clear_filters"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="8dp"
+                    android:text="Clear Filters"
+                    android:textColor="#FFF"
+                    android:backgroundTint="#FF5722"/>
+            </LinearLayout>
+
+            <!-- Available Tasks Section -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Available Tasks"
+                android:textSize="20sp"
+                android:textColor="#333"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"/>
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/tasks_recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:clipToPadding="false"
+                android:paddingTop="8dp"
+                android:paddingBottom="80dp" />
+
+        </LinearLayout>
+    </ScrollView>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab_add_task"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:contentDescription="Add new task"
+        app:srcCompat="@drawable/ic_add"
+        app:backgroundTint="#4CAF50"/>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

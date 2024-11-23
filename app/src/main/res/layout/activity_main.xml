@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="@drawable/__eczu7skp156k8ne_nn0dmq">
+
+    <!-- Title Text: Centered -->
+    <TextView
+        android:id="@+id/title_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Task Manager"
+        android:textSize="40sp"
+        android:textStyle="bold"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="40dp"/>
+
+
+    <TextView
+        android:id="@+id/description_text"
+        android:layout_width="432dp"
+        android:layout_height="218dp"
+        android:layout_below="@id/title_text"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="95dp"
+        android:layout_marginEnd="0dp"
+        android:fontFamily="cursive"
+        android:text="Manage your tasks effectively with Task Manager.\nKeep track of deadlines, set reminders, and collaborate with your team to boost productivity."
+        android:textSize="25sp" />
+
+    <ImageView
+        android:id="@+id/feature_image"
+        android:layout_width="432dp"
+        android:layout_height="307dp"
+        android:layout_below="@id/description_text"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="0dp"
+        android:src="@drawable/task_management_process_removebg_preview" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@id/feature_image"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp">
+
+        <!-- Login Button -->
+        <Button
+            android:id="@+id/login_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Login"
+            android:textSize="25dp"
+            android:layout_marginEnd="15dp"/>
+
+        <!-- Register Button -->
+        <Button
+            android:id="@+id/register_btn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Register"
+            android:textSize="25dp"
+            android:layout_marginStart="15dp"/>
+    </LinearLayout>
+
+</RelativeLayout>
