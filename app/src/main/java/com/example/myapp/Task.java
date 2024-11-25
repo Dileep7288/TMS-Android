@@ -27,7 +27,7 @@ public class Task {
     public String getTitle() { return title; }
     public String getDescription() { return description; }
 
-    public int getId() {  // Change return type to int
+    public int getId() {
         return id;
     }
 }

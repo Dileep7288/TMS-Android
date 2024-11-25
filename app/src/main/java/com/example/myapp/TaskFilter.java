@@ -43,7 +43,6 @@ public class TaskFilter {
 
         List<Task> filteredTasks = new ArrayList<>(tasks);
 
-        // Apply status filter
         if (!"All".equals(status)) {
             filteredTasks = filteredTasks.stream()
                     .filter(task -> status.equalsIgnoreCase(task.getStatus()))
@@ -51,7 +50,6 @@ public class TaskFilter {
             Log.d(TAG, "After status filter: " + filteredTasks.size());
         }
 
-        // Apply priority filter
         if (!"All".equals(priority)) {
             filteredTasks = filteredTasks.stream()
                     .filter(task -> priority.equalsIgnoreCase(task.getPriority()))
@@ -59,7 +57,6 @@ public class TaskFilter {
             Log.d(TAG, "After priority filter: " + filteredTasks.size());
         }
 
-        // Apply date filter
         if (startDate != null || endDate != null) {
             filteredTasks = filteredTasks.stream()
                     .filter(this::isWithinDateRange)
@@ -67,7 +64,6 @@ public class TaskFilter {
             Log.d(TAG, "After date filter: " + filteredTasks.size());
         }
 
-        // Log final results
         Log.d(TAG, "Final filtered tasks count: " + filteredTasks.size());
         for (Task task : filteredTasks) {
             Log.d(TAG, String.format("Task after filter - Title: %s, Status: %s, Priority: %s, Due Date: %s",
@@ -83,12 +79,10 @@ public class TaskFilter {
     private boolean isWithinDateRange(Task task) {
         Date taskDate = task.getDueDate();
 
-        // If no date range is specified, include all tasks
         if (startDate == null && endDate == null) {
             return true;
         }
 
-        // If task has no due date but date range is specified
         if (taskDate == null) {
             Log.d(TAG, "Task has no due date: " + task.getTitle());
             return false;

@@ -15,9 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import android.widget.ImageButton;
-import android.widget.PopupMenu;
-
 public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder> {
     private List<Task> tasks;
 
@@ -31,7 +28,7 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     public TaskAdapter(OnTaskActionListener listener) {
         this.tasks = new ArrayList<>();
         this.dateFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
-        this.listener = listener;  // Initialize listener
+        this.listener = listener;
     }
 
     @NonNull
@@ -64,7 +61,8 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
         private final TextView statusText;
         private final TextView priorityText;
         private final TextView dueDateText;
-        private final ImageButton menuButton;
+        private final TextView editButton;
+        private final TextView deleteButton;
 
 
         public TaskViewHolder(@NonNull View itemView) {
@@ -74,15 +72,16 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             statusText = itemView.findViewById(R.id.task_status);
             priorityText = itemView.findViewById(R.id.task_priority);
             dueDateText = itemView.findViewById(R.id.task_due_date);
-            menuButton = itemView.findViewById(R.id.task_menu); // Add this line
+            editButton = itemView.findViewById(R.id.btn_edit);
+            deleteButton = itemView.findViewById(R.id.btn_delete);
         }
 
 
         public void bind(Task task) {
-            titleText.setText(task.getTitle());
-            descriptionText.setText(task.getDescription());
-            statusText.setText(task.getStatus());
-            priorityText.setText(task.getPriority());
+            titleText.setText("Title: "+task.getTitle());
+            descriptionText.setText("Description: "+task.getDescription());
+            statusText.setText("Status: "+task.getStatus());
+            priorityText.setText("Priority: "+task.getPriority());
 
             // Set status background color
             int statusColor;
@@ -92,6 +91,9 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                     break;
                 case "in-progress":
                     statusColor = Color.parseColor("#2196F3");
+                    break;
+                case "hold":
+                    statusColor = Color.parseColor("#808080");
                     break;
                 default:
                     statusColor = Color.parseColor("#FFA000");
@@ -118,27 +120,23 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             if (task.getDueDate() != null) {
                 String formattedDate = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
                         .format(task.getDueDate());
-                dueDateText.setText("Due: " + formattedDate);
+                dueDateText.setText("Due Date: " + formattedDate);
                 dueDateText.setVisibility(View.VISIBLE);
             } else {
                 dueDateText.setVisibility(View.GONE);
             }
 
-            menuButton.setOnClickListener(v -> {
-                PopupMenu popup = new PopupMenu(v.getContext(), v);
-                popup.inflate(R.menu.task_item_menu);
-                popup.setOnMenuItemClickListener(item -> {
-                    int itemId = item.getItemId();
-                    if (itemId == R.id.action_delete) {
-                        listener.onDeleteTask(task);
-                        return true;
-                    } else if (itemId == R.id.action_edit) {
-                        listener.onEditTask(task);
-                        return true;
-                    }
-                    return false;
-                });
-                popup.show();
+            // Setup click listeners for edit and delete buttons
+            editButton.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onEditTask(task);
+                }
+            });
+
+            deleteButton.setOnClickListener(v -> {
+                if (listener != null) {
+                    listener.onDeleteTask(task);
+                }
             });
         }
     }

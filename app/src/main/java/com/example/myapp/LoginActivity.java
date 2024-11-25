@@ -4,133 +4,87 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import org.json.JSONObject;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 
 public class LoginActivity extends AppCompatActivity {
 
     private EditText usernameInput, passwordInput;
     private String username, password;
-    private final String LOGIN_URL = "http://172.16.20.76:8000/api/login/"; // Replace with your backend URL
+    private final String LOGIN_URL = "http://172.16.20.76:8000/api/login/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login); // Make sure you have this layout for login
+        setContentView(R.layout.activity_login);
 
         usernameInput = findViewById(R.id.username_input);
         passwordInput = findViewById(R.id.password_input);
 
-        // Set the login button listener
         findViewById(R.id.login_btn).setOnClickListener(v -> login());
 
-        // Set the register button listener to navigate to the registration page
         findViewById(R.id.register_redirect_btn).setOnClickListener(v -> navigateToRegister());
     }
 
-    // Login method
     public void login() {
         username = usernameInput.getText().toString().trim();
         password = passwordInput.getText().toString().trim();
 
-        // Validate inputs
         if (username.isEmpty() || password.isEmpty()) {
             Toast.makeText(this, "Please enter all fields", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // Perform login on a background thread
-        new Thread(() -> {
-            HttpURLConnection connection = null;
-            BufferedReader reader = null;
-            try {
-                // Prepare the connection to the server
-                URL url = new URL(LOGIN_URL);
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("POST");
-                connection.setRequestProperty("Content-Type", "application/json"); // Content type is JSON
-                connection.setDoOutput(true);
+        try {
+            JSONObject loginData = new JSONObject();
+            loginData.put("username", username);
+            loginData.put("password", password);
 
-                // Prepare the JSON data for the POST request (changed "email" to "username")
-                JSONObject loginData = new JSONObject();
-                loginData.put("username", username);  // Use "username" here
-                loginData.put("password", password);
-
-                // Send the JSON data
-                try (OutputStream os = connection.getOutputStream()) {
-                    os.write(loginData.toString().getBytes());
-                    os.flush();
-                }
-
-                // Get the response from the server
-                int responseCode = connection.getResponseCode();
-                reader = new BufferedReader(new InputStreamReader(
-                        responseCode == 200 ? connection.getInputStream() : connection.getErrorStream()
-                ));
-
-                StringBuilder response = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    response.append(line);
-                }
-
-                // Log the raw response from the server
-                Log.d("LoginResponse", "Response: " + response.toString());
-
-                // Check for successful login (200 OK)
-                runOnUiThread(() -> {
-                    try {
-                        JSONObject jsonResponse = new JSONObject(response.toString());
-
-                        // Check if the response contains access and refresh tokens
-                        if (jsonResponse.has("access") && jsonResponse.has("refresh")) {
-                            String accessToken = jsonResponse.getString("access");
-                            String refreshToken = jsonResponse.getString("refresh");
-
-                            // Store the tokens securely (e.g., in SharedPreferences)
-                            storeTokens(accessToken, refreshToken);
-
-                            // Show login successful message
-                            Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show();
-
-                            // Navigate to the DashBoard activity after successful login
-                            navigateToDashBoard();
-                        } else {
-                            // Handle the case where the tokens are missing
-                            Toast.makeText(this, "Unexpected server response", Toast.LENGTH_SHORT).show();
+            JsonObjectRequest loginRequest = new JsonObjectRequest(
+                    Request.Method.POST,
+                    LOGIN_URL,
+                    loginData,
+                    response -> {
+                        try {
+                            if (response.has("access") && response.has("refresh")) {
+                                String accessToken = response.getString("access");
+                                String refreshToken = response.getString("refresh");
+                                storeTokens(accessToken, refreshToken);
+                                Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show();
+                                navigateToDashBoard();
+                            } else {
+                                Toast.makeText(this, "Unexpected server response", Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            Toast.makeText(this, "Error parsing response: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
-
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        Toast.makeText(this, "Error parsing response: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    },
+                    error -> {
+                        String errorMessage = "Login failed";
+                        if (error.networkResponse != null) {
+                            errorMessage += " (Error " + error.networkResponse.statusCode + ")";
+                        }
+                        Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
+                        Log.e("LoginActivity", "Error: ", error);
                     }
-                });
+            );
 
-            } catch (Exception e) {
-                e.printStackTrace();
-                runOnUiThread(() -> Toast.makeText(this, "An error occurred: " + e.getMessage(), Toast.LENGTH_SHORT).show());
-            } finally {
-                // Close resources safely
-                try {
-                    if (reader != null) {
-                        reader.close();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                if (connection != null) {
-                    connection.disconnect();
-                }
-            }
-        }).start();
+            // Add request to queue
+            RequestQueue queue = Volley.newRequestQueue(this);
+            queue.add(loginRequest);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Error creating request: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     // Method to store the tokens securely (SharedPreferences in this case)
@@ -142,14 +96,11 @@ public class LoginActivity extends AppCompatActivity {
         editor.apply();
     }
 
-    // Method to navigate to the home page after successful login
     private void navigateToDashBoard() {
-        // Example navigation, you can change it based on your app flow
         Intent intent = new Intent(LoginActivity.this, DashBoardActivity.class);
         startActivity(intent);
     }
 
-    // Method to navigate to the registration page
     private void navigateToRegister() {
         Intent intent = new Intent(LoginActivity.this, RegistrationActivity.class);
         startActivity(intent);

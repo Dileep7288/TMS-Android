@@ -12,18 +12,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+import java.util.HashMap;
+import java.util.Map;
 public class CreateTaskActivity extends AppCompatActivity {
     private EditText titleEditText;
     private EditText descriptionEditText;
@@ -34,6 +34,8 @@ public class CreateTaskActivity extends AppCompatActivity {
     private Date dueDate;
     private SimpleDateFormat apiDateFormat;
     private SimpleDateFormat displayDateFormat;
+    private RequestQueue requestQueue;
+    private static final String CREATE_TASK_URL = "http://172.16.20.76:8000/api/tasks/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +43,7 @@ public class CreateTaskActivity extends AppCompatActivity {
         setContentView(R.layout.activity_create_task);
         setTitle("Create New Task");
 
+        requestQueue = Volley.newRequestQueue(this);
         apiDateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         displayDateFormat = new SimpleDateFormat("MMM dd, yyyy", Locale.getDefault());
 
@@ -62,7 +65,7 @@ public class CreateTaskActivity extends AppCompatActivity {
     private void setupSpinners() {
         ArrayAdapter<CharSequence> statusAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item,
-                new String[]{"yet-to-start", "in-progress", "completed","hold"});
+                new String[]{"yet-to-start", "in-progress", "completed", "hold"});
         statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         statusSpinner.setAdapter(statusAdapter);
 
@@ -92,6 +95,9 @@ public class CreateTaskActivity extends AppCompatActivity {
                     calendar.get(Calendar.MONTH),
                     calendar.get(Calendar.DAY_OF_MONTH)
             );
+
+            datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis() - 1000);
+
             datePickerDialog.show();
         });
     }
@@ -121,68 +127,64 @@ public class CreateTaskActivity extends AppCompatActivity {
     }
 
     private void createTask() {
-        new Thread(() -> {
-            HttpURLConnection connection = null;
-            try {
-                URL url = new URL("http://172.16.20.76:8000/api/tasks/");
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("POST");
-                connection.setRequestProperty("Content-Type", "application/json");
-                connection.setRequestProperty("Authorization", "Bearer " + getAccessToken());
-                connection.setDoOutput(true);
+        try {
+            JSONObject taskData = new JSONObject();
+            taskData.put("title", titleEditText.getText().toString().trim());
+            taskData.put("description", descriptionEditText.getText().toString().trim());
+            taskData.put("status", statusSpinner.getSelectedItem().toString());
+            taskData.put("priority", prioritySpinner.getSelectedItem().toString());
+            if (dueDate != null) {
+                taskData.put("deadline", apiDateFormat.format(dueDate));
+            }
 
-                JSONObject taskData = new JSONObject();
-                taskData.put("title", titleEditText.getText().toString().trim());
-                taskData.put("description", descriptionEditText.getText().toString().trim());
-                taskData.put("status", statusSpinner.getSelectedItem().toString());
-                taskData.put("priority", prioritySpinner.getSelectedItem().toString());
-                if (dueDate != null) {
-                    taskData.put("deadline", apiDateFormat.format(dueDate));
-                }
-
-                try (OutputStreamWriter writer = new OutputStreamWriter(connection.getOutputStream())) {
-                    writer.write(taskData.toString());
-                    writer.flush();
-                }
-
-                int responseCode = connection.getResponseCode();
-                if (responseCode == HttpURLConnection.HTTP_CREATED ||
-                        responseCode == HttpURLConnection.HTTP_OK) {
-                    runOnUiThread(() -> {
+            JsonObjectRequest request = new JsonObjectRequest(
+                    Request.Method.POST,
+                    CREATE_TASK_URL,
+                    taskData,
+                    response -> {
                         Toast.makeText(this, "Task created successfully", Toast.LENGTH_SHORT).show();
                         finish();
-                    });
-                } else {
-                    BufferedReader reader = new BufferedReader(
-                            new InputStreamReader(connection.getErrorStream()));
-                    StringBuilder response = new StringBuilder();
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        response.append(line);
+                    },
+                    error -> {
+                        String message = "Failed to create task";
+                        if (error.networkResponse != null) {
+                            try {
+                                String responseBody = new String(error.networkResponse.data, "utf-8");
+                                JSONObject data = new JSONObject(responseBody);
+                                message = data.optString("detail", message);
+                            } catch (Exception e) {
+                                message += " (Error " + error.networkResponse.statusCode + ")";
+                            }
+                        }
+                        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
                     }
-                    final String errorMessage = response.toString();
+            ) {
+                @Override
+                public Map<String, String> getHeaders() {
+                    Map<String, String> headers = new HashMap<>();
+                    headers.put("Authorization", "Bearer " + getAccessToken());
+                    return headers;
+                }
+            };
 
-                    runOnUiThread(() ->
-                            Toast.makeText(this, "Failed to create task: " + errorMessage,
-                                    Toast.LENGTH_SHORT).show()
-                    );
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                runOnUiThread(() ->
-                        Toast.makeText(this, "Error: " + e.getMessage(),
-                                Toast.LENGTH_SHORT).show()
-                );
-            } finally {
-                if (connection != null) {
-                    connection.disconnect();
-                }
-            }
-        }).start();
+            requestQueue.add(request);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     private String getAccessToken() {
         SharedPreferences sharedPreferences = getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
         return sharedPreferences.getString("access_token", null);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (requestQueue != null) {
+            requestQueue.cancelAll(this);
+        }
     }
 }

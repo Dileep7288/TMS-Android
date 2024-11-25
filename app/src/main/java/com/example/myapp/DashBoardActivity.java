@@ -1,46 +1,46 @@
 package com.example.myapp;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import android.graphics.Rect;
-import android.view.View;
-
-import android.content.Intent;
-import android.widget.EditText;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-import android.app.AlertDialog;
-import android.widget.ImageButton;
-
+import java.util.Map;
 public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.OnTaskActionListener{
     private TextView totalTasksTextView;
     private TextView completedTasksTextView;
@@ -48,31 +48,29 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
     private TextView priorityTaskCountTextView;
     private Spinner statusSpinner;
     private Spinner prioritySpinner;
-
     private TextView startDatePicker;
-
     private TextView endDatePicker;
     private Button applyFilters;
     private Button clearFilters;
     private Date startDate;
     private Date endDate;
     private List<Task> allTasks;
-
     private static final String DATE_FORMAT_DISPLAY = "MMM dd, yyyy";
     private static final String DATE_FORMAT_API = "yyyy-MM-dd";
     private SimpleDateFormat displayDateFormat;
     private SimpleDateFormat apiDateFormat;
-
     private RecyclerView tasksRecyclerView;
     private TaskAdapter taskAdapter;
     private FloatingActionButton fabAddTask;
-
     private ImageButton logoutButton;
+    private RequestQueue requestQueue;
+    private static final String BASE_URL = "http://172.16.20.76:8000/api/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
+        requestQueue = Volley.newRequestQueue(this);
 
         logoutButton = findViewById(R.id.logout_button);
         logoutButton.setOnClickListener(v -> showLogoutConfirmation());
@@ -98,59 +96,11 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
                 .show();
     }
 
-    private void performLogout() {
-        new Thread(() -> {
-            HttpURLConnection connection = null;
-            try {
-                URL url = new URL("http://172.16.20.76:8000/api/logout/");
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("POST");
-                connection.setRequestProperty("Authorization", "Bearer " + getAccessToken());
-
-                int responseCode = connection.getResponseCode();
-                if (responseCode == HttpURLConnection.HTTP_OK ||
-                        responseCode == HttpURLConnection.HTTP_NO_CONTENT) {
-
-                    // Clear stored tokens
-                    SharedPreferences sharedPreferences =
-                            getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    editor.remove("access_token");
-                    editor.remove("refresh_token");
-                    editor.apply();
-
-                    runOnUiThread(() -> {
-                        Toast.makeText(this, "Logged out successfully", Toast.LENGTH_SHORT).show();
-                        // Navigate to MainActivity
-                        Intent intent = new Intent(this, MainActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-                        finish();
-                    });
-                } else {
-                    runOnUiThread(() ->
-                            Toast.makeText(this, "Logout failed. Please try again.",
-                                    Toast.LENGTH_SHORT).show()
-                    );
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                runOnUiThread(() ->
-                        Toast.makeText(this, "Error during logout: " + e.getMessage(),
-                                Toast.LENGTH_SHORT).show()
-                );
-            } finally {
-                if (connection != null) {
-                    connection.disconnect();
-                }
-            }
-        }).start();
-    }
     private void setupFab() {
         fabAddTask = findViewById(R.id.fab_add_task);
         fabAddTask.setOnClickListener(v -> {
-            Intent intent = new Intent(this, CreateTaskActivity.class);
-            startActivity(intent);
+            Intent i = new Intent(this, CreateTaskActivity.class);
+            startActivity(i);
         });
     }
 
@@ -178,8 +128,6 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
             }
         });
     }
-
-
     private void initializeFilterViews() {
         statusSpinner = findViewById(R.id.status_spinner);
         prioritySpinner = findViewById(R.id.priority_spinner);
@@ -266,104 +214,70 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
         SharedPreferences sharedPreferences = getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
         return sharedPreferences.getString("access_token", null);
     }
-
-
     private void fetchTasksFromServer() {
-        new Thread(() -> {
-            HttpURLConnection connection = null;
-            BufferedReader reader = null;
-            try {
-                URL url = new URL("http://172.16.20.76:8000/api/tasks/list/");
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("GET");
-                connection.setDoInput(true);
+        String url = BASE_URL + "tasks/list/";
 
-                String accessToken = getAccessToken();
-                if (accessToken == null) {
-                    runOnUiThread(() -> Toast.makeText(this, "Access token not found", Toast.LENGTH_SHORT).show());
-                    return;
-                }
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.GET,
+                url,
+                null,
+                response -> {
+                    try {
+                        JSONArray tasksArray = response.getJSONArray("results");
+                        List<Task> tasks = new ArrayList<>();
 
-                connection.setRequestProperty("Authorization", "Bearer " + accessToken);
-                int responseCode = connection.getResponseCode();
-
-                if (responseCode != 200) {
-                    BufferedReader errorReader = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
-                    StringBuilder errorResponse = new StringBuilder();
-                    String line;
-                    while ((line = errorReader.readLine()) != null) {
-                        errorResponse.append(line);
-                    }
-                    String finalErrorMessage = errorResponse.toString();
-                    runOnUiThread(() -> Toast.makeText(this, "Error: " + finalErrorMessage, Toast.LENGTH_SHORT).show());
-                    return;
-                }
-
-                reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                StringBuilder response = new StringBuilder();
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    response.append(line);
-                }
-
-                // Parse JSON response
-                JSONObject jsonResponse = new JSONObject(response.toString());
-                JSONArray tasksArray = jsonResponse.getJSONArray("results");
-                List<Task> tasks = new ArrayList<>();
-
-                // Log the raw JSON response
-                Log.d("TaskFetch", "Raw JSON response: " + response.toString());
-                Log.d("TaskFetch", "Number of tasks in response: " + tasksArray.length());
-
-                for (int i = 0; i < tasksArray.length(); i++) {
-                    JSONObject taskObject = tasksArray.getJSONObject(i);
-                    // Log the individual task JSON
-                    Log.d("TaskCreation", "Processing task JSON: " + taskObject.toString());
-
-                    int id = taskObject.getInt("id");
-                    String status = taskObject.getString("status");
-                    String priority = taskObject.getString("priority");
-                    String title = taskObject.getString("title");
-                    String description = taskObject.getString("description");
-
-                    Date dueDate = null;
-                    if (!taskObject.isNull("deadline")) {
-                        String deadlineStr = taskObject.getString("deadline");
-                        try {
-                            dueDate = apiDateFormat.parse(deadlineStr);
-                        } catch (ParseException e) {
-                            Log.e("DateParse", "Error parsing deadline: " + deadlineStr, e);
+                        for (int i = 0; i < tasksArray.length(); i++) {
+                            JSONObject taskObject = tasksArray.getJSONObject(i);
+                            Task task = parseTaskFromJson(taskObject);
+                            if (task != null) {
+                                tasks.add(task);
+                            }
                         }
+
+                        allTasks = new ArrayList<>(tasks);
+                        updateUIWithTasks(tasks);
+
+                    } catch (Exception e) {
+                        Log.e("TaskFetch", "Error parsing tasks", e);
+                        Toast.makeText(this, "Error parsing tasks", Toast.LENGTH_SHORT).show();
                     }
+                },
+                error -> handleVolleyError(error)
+        ) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + getAccessToken());
+                return headers;
+            }
+        };
 
-                    Task task = new Task(id, status, priority, dueDate, title, description);
-                    tasks.add(task);
-                    Log.d("TaskCreation", String.format("Created task - Title: %s, Status: %s, Priority: %s, Deadline: %s",
-                            title, status, priority,
-                            dueDate != null ? apiDateFormat.format(dueDate) : "null"));
-                }
+        requestQueue.add(request);
+    }
 
-                // Update UI on main thread
-                List<Task> finalTasks = tasks;
-                runOnUiThread(() -> {
-                    allTasks = new ArrayList<>(finalTasks);
-                    Log.d("TaskCreation", "Total tasks loaded: " + allTasks.size());
-                    updateUIWithTasks(finalTasks);
-                });
+    private Task parseTaskFromJson(JSONObject taskObject) {
+        try {
+            int id = taskObject.getInt("id");
+            String status = taskObject.getString("status");
+            String priority = taskObject.getString("priority");
+            String title = taskObject.getString("title");
+            String description = taskObject.getString("description");
 
-            } catch (Exception e) {
-                Log.e("FetchTasksError", "Error fetching tasks", e);
-                String errorMessage = e.getMessage();
-                runOnUiThread(() -> Toast.makeText(this, "Error: " + errorMessage, Toast.LENGTH_SHORT).show());
-            } finally {
+            Date dueDate = null;
+            if (!taskObject.isNull("deadline")) {
+                String deadlineStr = taskObject.getString("deadline");
                 try {
-                    if (reader != null) reader.close();
-                    if (connection != null) connection.disconnect();
-                } catch (Exception e) {
-                    Log.e("Cleanup", "Error during cleanup", e);
+                    dueDate = apiDateFormat.parse(deadlineStr);
+                } catch (ParseException e) {
+                    Log.e("DateParse", "Error parsing deadline", e);
                 }
             }
-        }).start();
+
+            return new Task(id, status, priority, dueDate, title, description);
+        } catch (Exception e) {
+            Log.e("TaskParse", "Error parsing task", e);
+            return null;
+        }
     }
 
     private void applyTaskFilters() {
@@ -423,71 +337,127 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
 
     @Override
     public void onDeleteTask(Task task) {
-        new Thread(() -> {
-            HttpURLConnection connection = null;
-            try {
-                URL url = new URL("http://172.16.20.76:8000/api/tasks/delete/" + task.getId() + "/");
-                connection = (HttpURLConnection) url.openConnection();
-                connection.setRequestMethod("DELETE");
-                connection.setRequestProperty("Authorization", "Bearer " + getAccessToken());
+        new AlertDialog.Builder(this)
+                .setTitle("Delete Task")
+                .setMessage("Are you sure you want to delete this task?")
+                .setPositiveButton("Delete", (dialog, which) -> performDelete(task))
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
 
-                int responseCode = connection.getResponseCode();
-                if (responseCode == HttpURLConnection.HTTP_NO_CONTENT ||
-                        responseCode == HttpURLConnection.HTTP_OK) {
-                    runOnUiThread(() -> {
-                        allTasks.remove(task);
-                        updateUIWithTasks(allTasks);
-                        Toast.makeText(this, "Task deleted successfully", Toast.LENGTH_SHORT).show();
-                    });
-                } else {
-                    // Read error response
-                    BufferedReader reader = new BufferedReader(
-                            new InputStreamReader(connection.getErrorStream()));
-                    StringBuilder response = new StringBuilder();
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        response.append(line);
+    private void performDelete(Task task) {
+        String url = BASE_URL + "tasks/delete/" + task.getId() + "/";
+        Log.d("DeleteTask", "Attempting to delete task at URL: " + url);
+
+        StringRequest request = new StringRequest(
+                Request.Method.DELETE,
+                url,
+                response -> {
+                    allTasks.remove(task);
+                    updateUIWithTasks(allTasks);
+                    Toast.makeText(this, "Task deleted successfully", Toast.LENGTH_SHORT).show();
+                },
+                error -> {
+                    String message = "Failed to delete task";
+                    if (error.networkResponse != null) {
+                        try {
+                            String responseBody = new String(error.networkResponse.data, "utf-8");
+                            if (!responseBody.isEmpty()) {
+                                JSONObject data = new JSONObject(responseBody);
+                                message = data.optString("detail", message);
+                            }
+                        } catch (Exception e) {
+                            Log.e("DeleteTask", "Error parsing error response", e);
+                        }
                     }
-                    reader.close();
-
-                    final String errorMessage = response.toString();
-                    runOnUiThread(() ->
-                            Toast.makeText(this, "Failed to delete task: " + errorMessage,
-                                    Toast.LENGTH_SHORT).show()
-                    );
+                    Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                    Log.e("DeleteTask", "Error: " + error.toString());
                 }
-            } catch (Exception e) {
-                e.printStackTrace();
-                runOnUiThread(() ->
-                        Toast.makeText(this, "Error: " + e.getMessage(),
-                                Toast.LENGTH_SHORT).show()
-                );
-            } finally {
-                if (connection != null) {
-                    connection.disconnect();
-                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + getAccessToken());
+                return headers;
             }
-        }).start();
+        };
+
+        requestQueue.add(request);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        fetchTasksFromServer(); // Refresh tasks when returning from EditTaskActivity
+        fetchTasksFromServer();
+    }
+    private void performLogout() {
+        String url = BASE_URL + "logout/";
+
+        StringRequest request = new StringRequest(
+                Request.Method.POST,
+                url,
+                response -> {
+                    clearUserSession();
+                    navigateToMain();
+                },
+                this::handleVolleyError
+        ) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + getAccessToken());
+                return headers;
+            }
+        };
+
+        requestQueue.add(request);
     }
 
+    private void clearUserSession() {
+        SharedPreferences sharedPreferences = getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.remove("access_token");
+        editor.remove("refresh_token");
+        editor.apply();
+    }
+
+    private void navigateToMain() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    private void handleVolleyError(VolleyError error) {
+        String message = "An error occurred";
+        if (error.networkResponse != null) {
+            try {
+                String responseBody = new String(error.networkResponse.data, "utf-8");
+                if (!responseBody.isEmpty()) {
+                    JSONObject data = new JSONObject(responseBody);
+                    message = data.optString("detail", message);
+                } else {
+                    message = "Error " + error.networkResponse.statusCode;
+                }
+            } catch (Exception e) {
+                message = "Error " + error.networkResponse.statusCode;
+            }
+        }
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        Log.e("VolleyError", "Error: " + message, error);
+    }
     @Override
     public void onEditTask(Task task) {
-        Intent intent = new Intent(this, EditTaskActivity.class);
-        intent.putExtra("task_id", task.getId());
-        intent.putExtra("task_title", task.getTitle());
-        intent.putExtra("task_description", task.getDescription());
-        intent.putExtra("task_status", task.getStatus());
-        intent.putExtra("task_priority", task.getPriority());
+        Intent i = new Intent(this, EditTaskActivity.class);
+        i.putExtra("task_id", task.getId());
+        i.putExtra("task_title", task.getTitle());
+        i.putExtra("task_description", task.getDescription());
+        i.putExtra("task_status", task.getStatus());
+        i.putExtra("task_priority", task.getPriority());
         if (task.getDueDate() != null) {
-            intent.putExtra("task_due_date", apiDateFormat.format(task.getDueDate()));
+            i.putExtra("task_due_date", apiDateFormat.format(task.getDueDate()));
         }
-        startActivity(intent);
+        startActivity(i);
     }
     private void clearFilters() {
         statusSpinner.setSelection(0);
