@@ -19,7 +19,6 @@
         android:layout_alignParentTop="true"
         android:layout_marginTop="40dp"/>
 
-
     <TextView
         android:id="@+id/description_text"
         android:layout_width="432dp"
@@ -43,12 +42,13 @@
         android:src="@drawable/task_management_process_removebg_preview" />
 
     <LinearLayout
+        android:id="@+id/button_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:layout_below="@id/feature_image"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="30dp">
+        android:layout_marginTop="20dp">
 
         <!-- Login Button -->
         <Button
@@ -68,5 +68,17 @@
             android:textSize="25dp"
             android:layout_marginStart="15dp"/>
     </LinearLayout>
+
+    <!-- Admin Login Button -->
+    <Button
+        android:id="@+id/admin_main"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/button_layout"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="15dp"
+        android:text="Admin Page"
+        android:textSize="25dp"
+        android:backgroundTint="#FF5722"/>
 
 </RelativeLayout>

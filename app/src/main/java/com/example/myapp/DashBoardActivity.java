@@ -75,6 +75,9 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
         logoutButton = findViewById(R.id.logout_button);
         logoutButton.setOnClickListener(v -> showLogoutConfirmation());
 
+        ImageButton profileButton = findViewById(R.id.profile_button);
+        profileButton.setOnClickListener(v -> navigateToUser());
+
         displayDateFormat = new SimpleDateFormat(DATE_FORMAT_DISPLAY, Locale.getDefault());
         apiDateFormat = new SimpleDateFormat(DATE_FORMAT_API, Locale.getDefault());
 
@@ -85,6 +88,18 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
         setupFilterButtons();
         setupFab();
         fetchTasksFromServer();
+    }
+
+    private void navigateToUser() {
+        String token = getAccessToken();
+        if (token != null && !token.isEmpty()) {
+            Intent intent = new Intent(this, UserProfileActivity.class);
+            startActivity(intent);
+        } else {
+            Toast.makeText(this, "Please login again", Toast.LENGTH_SHORT).show();
+            clearUserSession();
+            navigateToMain();
+        }
     }
 
     private void showLogoutConfirmation() {

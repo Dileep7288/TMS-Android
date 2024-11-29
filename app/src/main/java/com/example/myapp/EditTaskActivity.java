@@ -32,8 +32,8 @@ public class EditTaskActivity extends AppCompatActivity {
     private static final String BASE_URL = "http://172.16.20.76:8000/api/";
     private static final String DATE_FORMAT_API = "yyyy-MM-dd";
     private static final String DATE_FORMAT_DISPLAY = "MMM dd, yyyy";
-    private EditText titleEditText;
-    private EditText descriptionEditText;
+    EditText titleEditText;
+    EditText descriptionEditText;
     private Spinner statusSpinner;
     private Spinner prioritySpinner;
     private TextView dueDatePicker;

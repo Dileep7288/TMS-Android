@@ -25,8 +25,8 @@ import com.android.volley.toolbox.Volley;
 import java.util.HashMap;
 import java.util.Map;
 public class CreateTaskActivity extends AppCompatActivity {
-    private EditText titleEditText;
-    private EditText descriptionEditText;
+    EditText titleEditText;
+    EditText descriptionEditText;
     private Spinner statusSpinner;
     private Spinner prioritySpinner;
     private TextView dueDatePicker;

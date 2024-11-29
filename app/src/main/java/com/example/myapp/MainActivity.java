@@ -15,6 +15,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         findViewById(R.id.login_btn).setOnClickListener(v -> navigateToLogin());
         findViewById(R.id.register_btn).setOnClickListener(v -> navigateToRegister());
+        findViewById(R.id.admin_main).setOnClickListener(v -> navigateToAdminMainPage());
     }
     private void navigateToLogin() {
         Intent intent = new Intent(MainActivity.this, LoginActivity.class);
@@ -23,5 +24,10 @@ public class MainActivity extends AppCompatActivity {
     private void navigateToRegister() {
         Intent intent = new Intent(MainActivity.this, RegistrationActivity.class);
         startActivity(intent);
+    }
+
+    private void navigateToAdminMainPage(){
+        Intent i = new Intent(MainActivity.this,AdminMainPage.class);
+        startActivity(i);
     }
 }

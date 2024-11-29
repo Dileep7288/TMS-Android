@@ -34,6 +34,17 @@
                     android:textStyle="bold"/>
 
                 <ImageButton
+                    android:id="@+id/profile_button"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/ic_profile"
+                    android:contentDescription="Profile"
+                    android:padding="12dp"
+                    android:layout_marginEnd="8dp"
+                    app:tint="#2196F3"/>
+
+                <ImageButton
                     android:id="@+id/logout_button"
                     android:layout_width="48dp"
                     android:layout_height="48dp"
@@ -311,7 +322,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Available Tasks"
+                android:text="Tasks That Are Available"
                 android:textSize="20sp"
                 android:textColor="#333"
                 android:textStyle="bold"

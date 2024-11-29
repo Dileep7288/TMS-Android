@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    android:background="@drawable/__eczu7skp156k8ne_nn0dmq">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/admin_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Admin Portal"
+        android:textSize="40sp"
+        android:textStyle="bold"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="40dp"/>
+
+    <!-- Description -->
+    <TextView
+        android:id="@+id/admin_description"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/admin_title"
+        android:layout_marginTop="30dp"
+        android:text="Welcome to the Admin Portal\nManage users and tasks efficiently"
+        android:textSize="25sp"
+        android:textAlignment="center"
+        android:fontFamily="cursive"/>
+
+    <!-- Admin Image -->
+    <ImageView
+        android:id="@+id/admin_image"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_below="@id/admin_description"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="30dp"
+        android:src="@drawable/admin_icon"/>
+
+    <!-- Admin Login Button Container -->
+    <LinearLayout
+        android:id="@+id/admin_buttons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/admin_image"
+        android:layout_marginTop="54dp"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <Button
+            android:id="@+id/admin_login_btn"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:backgroundTint="#4CAF50"
+            android:text="Admin Login"
+            android:textSize="20sp"/>
+
+    </LinearLayout>
+
+    <!-- Back Button -->
+    <Button
+        android:id="@+id/back_btn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Back"
+        android:textSize="18sp"
+        android:backgroundTint="#808080"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"/>
+
+</RelativeLayout>

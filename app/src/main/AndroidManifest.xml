@@ -4,6 +4,9 @@
 
     <!-- Internet permission -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
     <application
         android:allowBackup="true"
@@ -48,6 +51,30 @@
             android:name=".CreateTaskActivity"
             android:exported="false"
             android:label="Create Task"/>
+
+        <activity
+            android:name=".UserProfileActivity"
+            android:exported="false"
+            android:label="Edit Profile" />
+
+        <activity
+            android:name=".AdminMainPage"
+            android:exported="false"/>
+
+        <activity android:name=".AdminLoginPage"
+            android:exported="false"/>
+
+        <activity android:name="AdminDashBoard"
+            android:exported="false"/>
+
+        <activity android:name=".UsersList"
+            android:exported="false"/>
+
+        <activity android:name=".TaskList"
+            android:exported="false"/>
+
+        <activity android:name=".UserTasksActivity"
+            android:exported="false"/>
 
     </application>
 
