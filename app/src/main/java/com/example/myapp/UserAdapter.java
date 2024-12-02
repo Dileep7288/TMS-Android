@@ -18,8 +18,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
     public interface OnUserClickListener {
         void onUserClick(User user);
     }
-
-    // Updated constructor to properly initialize the listener
     public UserAdapter(Context context, List<User> users, OnUserClickListener listener) {
         this.context = context;
         this.users = users;
@@ -73,8 +71,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
             });
         }
     }
-
-    // Optional: Method to update the user list
     public void updateUsers(List<User> newUsers) {
         this.users = newUsers;
         notifyDataSetChanged();

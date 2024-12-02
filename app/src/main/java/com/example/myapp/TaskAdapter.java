@@ -83,7 +83,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             statusText.setText("Status: "+task.getStatus());
             priorityText.setText("Priority: "+task.getPriority());
 
-            // Set status background color
             int statusColor;
             switch (task.getStatus().toLowerCase()) {
                 case "completed":
@@ -101,7 +100,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             }
             statusText.getBackground().setColorFilter(statusColor, PorterDuff.Mode.SRC_IN);
 
-            // Set priority background color
             int priorityColor;
             switch (task.getPriority().toLowerCase()) {
                 case "high":
@@ -116,7 +114,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             }
             priorityText.getBackground().setColorFilter(priorityColor, PorterDuff.Mode.SRC_IN);
 
-            // Set due date
             if (task.getDueDate() != null) {
                 String formattedDate = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault())
                         .format(task.getDueDate());
@@ -126,7 +123,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                 dueDateText.setVisibility(View.GONE);
             }
 
-            // Setup click listeners for edit and delete buttons
             editButton.setOnClickListener(v -> {
                 if (listener != null) {
                     listener.onEditTask(task);
