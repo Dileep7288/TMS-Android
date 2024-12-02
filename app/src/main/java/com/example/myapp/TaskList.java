@@ -26,46 +26,46 @@ import java.util.Map;
 public class TaskList extends AppCompatActivity implements TaskAdapter.OnTaskActionListener {
     private RecyclerView rc;
     private TaskAdapter ad;
-    private final String Task_List_Url="http://172.16.20.76:8000/api/superuser/dashboard/";
+    private final String Task_List_Url = "http://172.16.20.76:8000/api/superuser/dashboard/";
     private SharedPreferences sp;
     private ImageView backArrow;
 
     @Override
-    protected void onCreate(Bundle si){
+    protected void onCreate(Bundle si) {
         super.onCreate(si);
         setContentView(R.layout.activity_task_list);
 
-        backArrow=findViewById(R.id.back_arrow);
-        backArrow.setOnClickListener(v->{
-            Intent i=new Intent(TaskList.this,AdminDashBoard.class);
+        backArrow = findViewById(R.id.back_arrow);
+        backArrow.setOnClickListener(v -> {
+            Intent i = new Intent(TaskList.this, AdminDashBoard.class);
             startActivity(i);
             finish();
         });
 
-        rc=findViewById(R.id.task_recycler_view);
+        rc = findViewById(R.id.task_recycler_view);
         rc.setLayoutManager(new LinearLayoutManager(this));
 
-        sp=getApplicationContext().getSharedPreferences("AdminPrefs",MODE_PRIVATE);
-        ad=new TaskAdapter(this);
+        sp = getApplicationContext().getSharedPreferences("AdminPrefs", MODE_PRIVATE);
+        ad = new TaskAdapter(this, false); // false for admin view
         rc.setAdapter(ad);
         fetchTasks();
     }
 
-    private void fetchTasks(){
-        String accessToken=sp.getString("admin_access_token","");
-        JsonObjectRequest req=new JsonObjectRequest(
+    private void fetchTasks() {
+        String accessToken = sp.getString("admin_access_token", "");
+        JsonObjectRequest req = new JsonObjectRequest(
                 Request.Method.GET,
                 Task_List_Url,
                 null,
                 response -> {
                     try {
-                        if(response.getString("status").equals("success")){
-                            JSONObject data=response.getJSONObject("data");
-                            JSONArray ja=data.getJSONArray("all_tasks");
-                            List<Task> tl=new ArrayList<>();
+                        if (response.getString("status").equals("success")) {
+                            JSONObject data = response.getJSONObject("data");
+                            JSONArray ja = data.getJSONArray("all_tasks");
+                            List<Task> tl = new ArrayList<>();
 
-                            SimpleDateFormat d=new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-                            for(int i=0;i<ja.length();i++) {
+                            SimpleDateFormat d = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+                            for (int i = 0; i < ja.length(); i++) {
                                 JSONObject jb = ja.getJSONObject(i);
                                 Date dueDate = null;
                                 Date createdAt = null;

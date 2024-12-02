@@ -52,7 +52,7 @@ public class UserTasksActivity extends AppCompatActivity implements TaskAdapter.
         sp = getSharedPreferences("AdminPrefs", MODE_PRIVATE);
         tx.setText(username + "'s Tasks");
         rc.setLayoutManager(new LinearLayoutManager(this));
-        ad = new TaskAdapter(this);
+        ad = new TaskAdapter(this, false); // false to indicate view-only mode
         rc.setAdapter(ad);
         fetchUserTasks(username);
     }

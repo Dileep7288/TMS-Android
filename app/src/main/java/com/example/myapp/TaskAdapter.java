@@ -19,16 +19,18 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
     private List<Task> tasks;
 
     private final OnTaskActionListener listener;
+    private final boolean isUserView;
     private SimpleDateFormat dateFormat;
     public interface OnTaskActionListener {
         void onDeleteTask(Task task);
         void onEditTask(Task task);
     }
 
-    public TaskAdapter(OnTaskActionListener listener) {
+    public TaskAdapter(OnTaskActionListener listener,Boolean isUserView) {
         this.tasks = new ArrayList<>();
         this.dateFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
         this.listener = listener;
+        this.isUserView = isUserView;
     }
 
     @NonNull
@@ -74,6 +76,15 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
             dueDateText = itemView.findViewById(R.id.task_due_date);
             editButton = itemView.findViewById(R.id.btn_edit);
             deleteButton = itemView.findViewById(R.id.btn_delete);
+
+            // Show/hide buttons based on user type
+            if (isUserView) {
+                editButton.setVisibility(View.VISIBLE);
+                deleteButton.setVisibility(View.VISIBLE);
+            } else {
+                editButton.setVisibility(View.GONE);
+                deleteButton.setVisibility(View.GONE);
+            }
         }
 
 
@@ -123,17 +134,19 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                 dueDateText.setVisibility(View.GONE);
             }
 
-            editButton.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onEditTask(task);
-                }
-            });
+            if (isUserView) {
+                editButton.setOnClickListener(v -> {
+                    if (listener != null) {
+                        listener.onEditTask(task);
+                    }
+                });
 
-            deleteButton.setOnClickListener(v -> {
-                if (listener != null) {
-                    listener.onDeleteTask(task);
-                }
-            });
+                deleteButton.setOnClickListener(v -> {
+                    if (listener != null) {
+                        listener.onDeleteTask(task);
+                    }
+                });
+            }
         }
     }
 }

@@ -41,7 +41,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.OnTaskActionListener{
+
+public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.OnTaskActionListener {
     private TextView totalTasksTextView;
     private TextView completedTasksTextView;
     private TextView pendingTasksTextView;
@@ -113,10 +114,15 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
 
     private void setupFab() {
         fabAddTask = findViewById(R.id.fab_add_task);
-        fabAddTask.setOnClickListener(v -> {
-            Intent i = new Intent(this, CreateTaskActivity.class);
-            startActivity(i);
-        });
+        if (isAdmin()) {
+            fabAddTask.setVisibility(View.GONE);
+        } else {
+            fabAddTask.setVisibility(View.VISIBLE);
+            fabAddTask.setOnClickListener(v -> {
+                Intent i = new Intent(this, CreateTaskActivity.class);
+                startActivity(i);
+            });
+        }
     }
 
     private void initializeViews() {
@@ -129,7 +135,7 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
     }
 
     private void setupRecyclerView() {
-        taskAdapter = new TaskAdapter(this);
+        taskAdapter = new TaskAdapter(this, !isAdmin());
         tasksRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         tasksRecyclerView.setAdapter(taskAdapter);
 
@@ -143,6 +149,7 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
             }
         });
     }
+
     private void initializeFilterViews() {
         statusSpinner = findViewById(R.id.status_spinner);
         prioritySpinner = findViewById(R.id.priority_spinner);
@@ -229,6 +236,12 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
         SharedPreferences sharedPreferences = getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
         return sharedPreferences.getString("access_token", null);
     }
+
+    private boolean isAdmin() {
+        SharedPreferences sharedPreferences = getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
+        return sharedPreferences.getBoolean("is_admin", false);
+    }
+
     private void fetchTasksFromServer() {
         String url = BASE_URL + "tasks/list/";
 
@@ -352,12 +365,14 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
 
     @Override
     public void onDeleteTask(Task task) {
-        new AlertDialog.Builder(this)
-                .setTitle("Delete Task")
-                .setMessage("Are you sure you want to delete this task?")
-                .setPositiveButton("Delete", (dialog, which) -> performDelete(task))
-                .setNegativeButton("Cancel", null)
-                .show();
+        if (!isAdmin()) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Delete Task")
+                    .setMessage("Are you sure you want to delete this task?")
+                    .setPositiveButton("Delete", (dialog, which) -> performDelete(task))
+                    .setNegativeButton("Cancel", null)
+                    .show();
+        }
     }
 
     private void performDelete(Task task) {
@@ -405,6 +420,7 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
         super.onResume();
         fetchTasksFromServer();
     }
+
     private void performLogout() {
         String url = BASE_URL + "logout/";
 
@@ -461,19 +477,23 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
         Log.e("VolleyError", "Error: " + message, error);
     }
+
     @Override
     public void onEditTask(Task task) {
-        Intent i = new Intent(this, EditTaskActivity.class);
-        i.putExtra("task_id", task.getId());
-        i.putExtra("task_title", task.getTitle());
-        i.putExtra("task_description", task.getDescription());
-        i.putExtra("task_status", task.getStatus());
-        i.putExtra("task_priority", task.getPriority());
-        if (task.getDueDate() != null) {
-            i.putExtra("task_due_date", apiDateFormat.format(task.getDueDate()));
+        if (!isAdmin()) {
+            Intent i = new Intent(this, EditTaskActivity.class);
+            i.putExtra("task_id", task.getId());
+            i.putExtra("task_title", task.getTitle());
+            i.putExtra("task_description", task.getDescription());
+            i.putExtra("task_status", task.getStatus());
+            i.putExtra("task_priority", task.getPriority());
+            if (task.getDueDate() != null) {
+                i.putExtra("task_due_date", apiDateFormat.format(task.getDueDate()));
+            }
+            startActivity(i);
         }
-        startActivity(i);
     }
+
     private void clearFilters() {
         statusSpinner.setSelection(0);
         prioritySpinner.setSelection(0);
