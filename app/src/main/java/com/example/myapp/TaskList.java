@@ -46,7 +46,7 @@ public class TaskList extends AppCompatActivity implements TaskAdapter.OnTaskAct
         rc.setLayoutManager(new LinearLayoutManager(this));
 
         sp = getApplicationContext().getSharedPreferences("AdminPrefs", MODE_PRIVATE);
-        ad = new TaskAdapter(this, false); // false for admin view
+        ad = new TaskAdapter(this, false);
         rc.setAdapter(ad);
         fetchTasks();
     }

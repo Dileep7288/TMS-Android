@@ -71,16 +71,15 @@ public class AdminLoginPage extends AppCompatActivity {
                                     Toast.makeText(this,"Login Failed",Toast.LENGTH_SHORT).show();
                                 }
                 } catch (JSONException e) {
-                    Toast.makeText(this,"Error Parsing response"+e.getMessage(),Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this,"Error Parsing response: "+e.getMessage(),Toast.LENGTH_SHORT).show();
                 }
             }, error -> {
-                Toast.makeText(this,"Network error"+error.getMessage(),Toast.LENGTH_SHORT).show();
+                Toast.makeText(this,"Network error: "+error.getMessage(),Toast.LENGTH_SHORT).show();
             });
-            RequestQueue rq=Volley.newRequestQueue(this);
-            rq.add(req);
+            Volley.newRequestQueue(this).add(req);
         }
         catch (JSONException e) {
-            Toast.makeText(this,"Error Creating Request"+e.getMessage(),Toast.LENGTH_SHORT).show();
+            Toast.makeText(this,"Error Creating Request: "+e.getMessage(),Toast.LENGTH_SHORT).show();
         }
     }
 
