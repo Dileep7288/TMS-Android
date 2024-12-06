@@ -34,13 +34,7 @@ import org.json.JSONObject;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.OnTaskActionListener {
     private TextView totalTasksTextView;
@@ -90,7 +84,6 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
         setupFab();
         fetchTasksFromServer();
     }
-
     private void navigateToUser() {
         String token = getAccessToken();
         if (token != null && !token.isEmpty()) {
@@ -98,11 +91,14 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
             startActivity(intent);
         } else {
             Toast.makeText(this, "Please login again", Toast.LENGTH_SHORT).show();
-            clearUserSession();
+            clearUser();
             navigateToMain();
         }
     }
-
+    private String getAccessToken() {
+        SharedPreferences sharedPreferences = getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
+        return sharedPreferences.getString("access_token", null);
+    }
     private void showLogoutConfirmation() {
         new AlertDialog.Builder(this)
                 .setTitle("Logout")
@@ -139,7 +135,6 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
         tasksRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         tasksRecyclerView.setAdapter(taskAdapter);
 
-        // Add item decoration for spacing
         int spacing = getResources().getDimensionPixelSize(R.dimen.task_item_spacing);
         tasksRecyclerView.addItemDecoration(new RecyclerView.ItemDecoration() {
             @Override
@@ -160,11 +155,11 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
     }
 
     private void setupSpinners() {
-        ArrayAdapter<CharSequence> statusAdapter = new ArrayAdapter<>(this,
+        ArrayAdapter<CharSequence> sA = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item,
                 new String[]{"All", "yet-to-start", "in-progress", "completed", "hold"});
-        statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        statusSpinner.setAdapter(statusAdapter);
+        sA.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        statusSpinner.setAdapter(sA);
 
         ArrayAdapter<CharSequence> priorityAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item,
@@ -232,10 +227,7 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
         calendar.set(Calendar.MILLISECOND, 0);
     }
 
-    private String getAccessToken() {
-        SharedPreferences sharedPreferences = getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
-        return sharedPreferences.getString("access_token", null);
-    }
+
 
     private boolean isAdmin() {
         SharedPreferences sharedPreferences = getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
@@ -318,16 +310,6 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
             String selectedStatus = statusSpinner.getSelectedItem().toString();
             String selectedPriority = prioritySpinner.getSelectedItem().toString();
 
-            // Log all tasks before filtering
-            Log.d("TaskFilter", "Before filtering - Total tasks: " + allTasks.size());
-            for (Task task : allTasks) {
-                Log.d("TaskFilter", String.format("Task - Title: %s, Status: %s, Priority: %s, Due Date: %s",
-                        task.getTitle(),
-                        task.getStatus(),
-                        task.getPriority(),
-                        task.getDueDate() != null ? apiDateFormat.format(task.getDueDate()) : "null"));
-            }
-
             TaskFilter filter = new TaskFilter.Builder()
                     .setStatus(selectedStatus)
                     .setPriority(selectedPriority)
@@ -335,26 +317,6 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
                     .build();
 
             List<Task> filteredTasks = filter.apply(allTasks);
-
-            // Log filter parameters
-            Log.d("TaskFilter", String.format("Filter parameters - Status: %s, Priority: %s",
-                    selectedStatus, selectedPriority));
-            if (startDate != null || endDate != null) {
-                Log.d("TaskFilter", String.format("Date range: %s to %s",
-                        startDate != null ? apiDateFormat.format(startDate) : "none",
-                        endDate != null ? apiDateFormat.format(endDate) : "none"));
-            }
-
-            // Log filtered results
-            Log.d("TaskFilter", "After filtering - Tasks: " + filteredTasks.size());
-            for (Task task : filteredTasks) {
-                Log.d("TaskFilter", String.format("Filtered Task - Title: %s, Status: %s, Priority: %s, Due Date: %s",
-                        task.getTitle(),
-                        task.getStatus(),
-                        task.getPriority(),
-                        task.getDueDate() != null ? apiDateFormat.format(task.getDueDate()) : "null"));
-            }
-
             updateUIWithTasks(filteredTasks);
 
         } catch (IllegalArgumentException e) {
@@ -377,7 +339,6 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
 
     private void performDelete(Task task) {
         String url = BASE_URL + "tasks/delete/" + task.getId() + "/";
-        Log.d("DeleteTask", "Attempting to delete task at URL: " + url);
 
         StringRequest request = new StringRequest(
                 Request.Method.DELETE,
@@ -428,7 +389,7 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
                 Request.Method.POST,
                 url,
                 response -> {
-                    clearUserSession();
+                    clearUser();
                     navigateToMain();
                 },
                 this::handleVolleyError
@@ -443,22 +404,19 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
 
         requestQueue.add(request);
     }
-
-    private void clearUserSession() {
+    private void clearUser() {
         SharedPreferences sharedPreferences = getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.remove("access_token");
         editor.remove("refresh_token");
         editor.apply();
     }
-
     private void navigateToMain() {
         Intent intent = new Intent(this, MainActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
     }
-
     private void handleVolleyError(VolleyError error) {
         String message = "An error occurred";
         if (error.networkResponse != null) {
@@ -477,7 +435,6 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
         Log.e("VolleyError", "Error: " + message, error);
     }
-
     @Override
     public void onEditTask(Task task) {
         if (!isAdmin()) {
@@ -493,7 +450,6 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
             startActivity(i);
         }
     }
-
     private void clearFilters() {
         statusSpinner.setSelection(0);
         prioritySpinner.setSelection(0);
@@ -507,7 +463,6 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
             Toast.makeText(this, "Filters cleared", Toast.LENGTH_SHORT).show();
         }
     }
-
     private void updateUIWithTasks(List<Task> tasks) {
         int totalTasks = tasks.size();
         int completedTasks = 0;
@@ -517,35 +472,31 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
         int highPriorityCount = 0;
 
         for (Task task : tasks) {
-            switch (task.getStatus().toLowerCase()) {
-                case "completed":
-                    completedTasks++;
-                    break;
-                case "yet-to-start":
-                case "in-progress":
-                    pendingTasks++;
-                    break;
-            }
-
-            switch (task.getPriority().toLowerCase()) {
-                case "low":
-                    lowPriorityCount++;
-                    break;
-                case "medium":
-                    mediumPriorityCount++;
-                    break;
-                case "high":
-                    highPriorityCount++;
-                    break;
-            }
+           String status=task.getStatus().toLowerCase();
+           if(status.equals("completed")){
+               completedTasks++;
+           }
+           else if(status.equals("in-progress")||status.equals("hold")||status.equals("yet-to-start")){
+               pendingTasks++;
+           }
+           String priority=task.getPriority().toLowerCase();
+           if(priority.equals("low")){
+               lowPriorityCount++;
+           }
+           else if (priority.equals("medium")){
+               mediumPriorityCount++;
+           }
+           else if(priority.equals("high")){
+               highPriorityCount++;
+           }
         }
-
         totalTasksTextView.setText(String.valueOf(totalTasks));
         completedTasksTextView.setText(String.valueOf(completedTasks));
         pendingTasksTextView.setText(String.valueOf(pendingTasks));
-        priorityTaskCountTextView.setText(String.format("Low: %d, Medium: %d, High: %d",
-                lowPriorityCount, mediumPriorityCount, highPriorityCount));
-
+        String countText = "Low: " + lowPriorityCount +
+                ", Medium: " + mediumPriorityCount +
+                ", High: " + highPriorityCount;
+        priorityTaskCountTextView.setText(countText);
         taskAdapter.setTasks(tasks);
     }
 }

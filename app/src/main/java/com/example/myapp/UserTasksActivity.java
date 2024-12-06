@@ -70,7 +70,7 @@ public class UserTasksActivity extends AppCompatActivity implements TaskAdapter.
     }
 
     private void fetchUserTasks(String username) {
-        String accessToken = sp.getString("admin_access_token", "");
+        String accessToken = sp.getString("admin_access_token",    "");
 
         JsonObjectRequest req = new JsonObjectRequest(
                 Request.Method.GET,

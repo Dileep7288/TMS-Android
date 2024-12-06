@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 public class TaskFilter {
     private static final String TAG = "TaskFilter";
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
-
     private final String status;
     private final String priority;
     private final Date startDate;
@@ -24,21 +23,9 @@ public class TaskFilter {
         this.startDate = builder.startDate;
         this.endDate = builder.endDate;
     }
-
     public List<Task> apply(List<Task> tasks) {
         if (tasks == null || tasks.isEmpty()) {
-            Log.d(TAG, "No tasks to filter");
             return new ArrayList<>();
-        }
-
-        // Log initial state
-        Log.d(TAG, "Initial tasks count: " + tasks.size());
-        for (Task task : tasks) {
-            Log.d(TAG, String.format("Task before filter - Title: %s, Status: %s, Priority: %s, Due Date: %s",
-                    task.getTitle(),
-                    task.getStatus(),
-                    task.getPriority(),
-                    task.getDueDate() != null ? DATE_FORMAT.format(task.getDueDate()) : "null"));
         }
 
         List<Task> filteredTasks = new ArrayList<>(tasks);
@@ -47,30 +34,18 @@ public class TaskFilter {
             filteredTasks = filteredTasks.stream()
                     .filter(task -> status.equalsIgnoreCase(task.getStatus()))
                     .collect(Collectors.toList());
-            Log.d(TAG, "After status filter: " + filteredTasks.size());
         }
 
         if (!"All".equals(priority)) {
             filteredTasks = filteredTasks.stream()
                     .filter(task -> priority.equalsIgnoreCase(task.getPriority()))
                     .collect(Collectors.toList());
-            Log.d(TAG, "After priority filter: " + filteredTasks.size());
         }
 
         if (startDate != null || endDate != null) {
             filteredTasks = filteredTasks.stream()
                     .filter(this::isWithinDateRange)
                     .collect(Collectors.toList());
-            Log.d(TAG, "After date filter: " + filteredTasks.size());
-        }
-
-        Log.d(TAG, "Final filtered tasks count: " + filteredTasks.size());
-        for (Task task : filteredTasks) {
-            Log.d(TAG, String.format("Task after filter - Title: %s, Status: %s, Priority: %s, Due Date: %s",
-                    task.getTitle(),
-                    task.getStatus(),
-                    task.getPriority(),
-                    task.getDueDate() != null ? DATE_FORMAT.format(task.getDueDate()) : "null"));
         }
 
         return filteredTasks;
@@ -88,7 +63,6 @@ public class TaskFilter {
             return false;
         }
 
-        // Convert all dates to Calendar for comparison
         Calendar taskCal = Calendar.getInstance();
         taskCal.setTime(taskDate);
         setToStartOfDay(taskCal);
@@ -116,17 +90,14 @@ public class TaskFilter {
                     DATE_FORMAT.format(endCal.getTime()),
                     withinRange));
         }
-
         return withinRange;
     }
-
     private void setToStartOfDay(Calendar calendar) {
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
     }
-
     public static class Builder {
         private String status = "All";
         private String priority = "All";
@@ -137,18 +108,15 @@ public class TaskFilter {
             this.status = status;
             return this;
         }
-
         public Builder setPriority(String priority) {
             this.priority = priority;
             return this;
         }
-
         public Builder setDateRange(Date startDate, Date endDate) {
             this.startDate = startDate;
             this.endDate = endDate;
             return this;
         }
-
         public TaskFilter build() {
             return new TaskFilter(this);
         }

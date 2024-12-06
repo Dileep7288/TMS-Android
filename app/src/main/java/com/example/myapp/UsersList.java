@@ -2,7 +2,6 @@ package com.example.myapp;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.Image;
 import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -43,7 +42,7 @@ public class UsersList extends AppCompatActivity implements UserAdapter.OnUserCl
             finish();
         });
 
-        rv=findViewById(R.id.user_recycler_view);
+          rv=findViewById(R.id.user_recycler_view);
         rv.setLayoutManager(new LinearLayoutManager(this));
 
         sp=getApplicationContext().getSharedPreferences("AdminPrefs",MODE_PRIVATE);
@@ -55,7 +54,6 @@ public class UsersList extends AppCompatActivity implements UserAdapter.OnUserCl
     }
     @Override
     public void onUserClick(User user) {
-        // Navigate to UserTasksActivity with the selected user's ID
         Intent intent = new Intent(this, UserTasksActivity.class);
         intent.putExtra("user_id", user.getId());
         intent.putExtra("username", user.getUsername());
@@ -83,7 +81,7 @@ public class UsersList extends AppCompatActivity implements UserAdapter.OnUserCl
                                 ul.add(user);
                             }
                             ad.notifyDataSetChanged();
-                        }else {
+                        }else{
                             Toast.makeText(this,"failed to fetch users",Toast.LENGTH_SHORT).show();
                         }
                     }catch (JSONException e){

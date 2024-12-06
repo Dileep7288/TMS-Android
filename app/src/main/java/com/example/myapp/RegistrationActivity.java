@@ -70,22 +70,16 @@ public class RegistrationActivity extends AppCompatActivity {
                             errorMessage += " (Error " + error.networkResponse.statusCode + ")";
                         }
                         Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
-                        Log.e("RegistrationActivity", "Error: ", error);
                     }
             );
-
-            // Add request to queue
-            RequestQueue queue = Volley.newRequestQueue(this);
-            queue.add(registerRequest);
-
+            Volley.newRequestQueue(this).add(registerRequest);
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(this, "Error creating request: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
-
     private void navigateToLogin() {
-        Intent i = new Intent(RegistrationActivity.this, LoginActivity.class);
+        Intent i = new Intent(this, LoginActivity.class);
         startActivity(i);
     }
 }

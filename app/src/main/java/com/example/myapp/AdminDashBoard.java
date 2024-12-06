@@ -25,7 +25,6 @@ public class AdminDashBoard extends AppCompatActivity {
         logoutBtn=findViewById(R.id.logout_btn);
 
         sharedPreferences = getSharedPreferences("AdminPrefs", MODE_PRIVATE);
-
         String username = sharedPreferences.getString("admin_username", "");
         String email = sharedPreferences.getString("admin_email", "");
 

@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import org.json.JSONObject;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -41,7 +40,6 @@ public class LoginActivity extends AppCompatActivity {
             Toast.makeText(this, "Please enter all fields", Toast.LENGTH_SHORT).show();
             return;
         }
-
         try {
             JSONObject loginData = new JSONObject();
             loginData.put("username", username);
@@ -76,18 +74,13 @@ public class LoginActivity extends AppCompatActivity {
                         Log.e("LoginActivity", "Error: ", error);
                     }
             );
-
-            // Add request to queue
-            RequestQueue queue = Volley.newRequestQueue(this);
-            queue.add(loginRequest);
+            Volley.newRequestQueue(this).add(loginRequest);
 
         } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(this, "Error creating request: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
-
-    // Method to store the tokens securely (SharedPreferences in this case)
     private void storeTokens(String accessToken, String refreshToken) {
         SharedPreferences sharedPreferences = getSharedPreferences("MyAppPrefs", MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPreferences.edit();

@@ -61,7 +61,6 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                 if (listener != null) {
                     listener.onUserClick(user);
                 } else {
-                    // Fallback to direct intent if no listener is set
                     Intent intent = new Intent(context, UserTasksActivity.class);
                     intent.putExtra("user_id", user.getId());
                     intent.putExtra("username", user.getUsername());
@@ -70,9 +69,5 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                 }
             });
         }
-    }
-    public void updateUsers(List<User> newUsers) {
-        this.users = newUsers;
-        notifyDataSetChanged();
     }
 }
