@@ -64,7 +64,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
                     Intent intent = new Intent(context, UserTasksActivity.class);
                     intent.putExtra("user_id", user.getId());
                     intent.putExtra("username", user.getUsername());
-                    intent.putExtra("email", user.getEmail());
+                    intent.putExtra("e mail", user.getEmail());
                     context.startActivity(intent);
                 }
             });

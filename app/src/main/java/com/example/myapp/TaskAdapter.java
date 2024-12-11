@@ -85,8 +85,6 @@ public class TaskAdapter extends RecyclerView.Adapter<TaskAdapter.TaskViewHolder
                 deleteButton.setVisibility(View.GONE);
             }
         }
-
-
         public void bind(Task task) {
             titleText.setText("Title: "+task.getTitle());
             descriptionText.setText("Description: "+task.getDescription());

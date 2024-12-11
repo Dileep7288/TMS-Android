@@ -1,53 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="16dp"
     android:background="@drawable/__eczu7skp156k8ne_nn0dmq">
 
     <!-- Title Text: Centered -->
+
     <TextView
         android:id="@+id/title_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="36dp"
         android:text="Task Manager"
         android:textSize="40sp"
         android:textStyle="bold"
-        android:layout_centerHorizontal="true"
-        android:layout_alignParentTop="true"
-        android:layout_marginTop="40dp"/>
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.503"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/description_text"
-        android:layout_width="432dp"
-        android:layout_height="218dp"
-        android:layout_below="@id/title_text"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="95dp"
-        android:layout_marginEnd="0dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:fontFamily="cursive"
         android:text="Manage your tasks effectively with Task Manager.\nKeep track of deadlines, set reminders, and collaborate with your team to boost productivity."
-        android:textSize="25sp" />
+        android:textSize="25sp"
+        app:layout_constraintTop_toBottomOf="@id/title_text"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="20dp"/>
 
     <ImageView
         android:id="@+id/feature_image"
-        android:layout_width="432dp"
-        android:layout_height="307dp"
-        android:layout_below="@id/description_text"
-        android:layout_alignParentEnd="true"
-        android:layout_marginTop="6dp"
-        android:layout_marginEnd="0dp"
-        android:src="@drawable/task_management_process_removebg_preview" />
+        android:layout_width="418dp"
+        android:layout_height="328dp"
+        android:layout_marginTop="8dp"
+        android:src="@drawable/task_management_process_removebg_preview"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/description_text" />
 
     <LinearLayout
         android:id="@+id/button_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_below="@id/feature_image"
-        android:layout_centerHorizontal="true"
+        app:layout_constraintTop_toBottomOf="@id/feature_image"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="20dp">
 
         <!-- Login Button -->
@@ -56,7 +60,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Login"
-            android:textSize="25dp"
+            android:textSize="25sp"
             android:layout_marginEnd="15dp"/>
 
         <!-- Register Button -->
@@ -65,7 +69,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Register"
-            android:textSize="25dp"
+            android:textSize="25sp"
             android:layout_marginStart="15dp"/>
     </LinearLayout>
 
@@ -74,11 +78,12 @@
         android:id="@+id/admin_main"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/button_layout"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="15dp"
         android:text="Admin Page"
-        android:textSize="25dp"
-        android:backgroundTint="#FF5722"/>
+        android:textSize="25sp"
+        android:backgroundTint="#FF5722"
+        app:layout_constraintTop_toBottomOf="@id/button_layout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="15dp"/>
 
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -42,7 +42,7 @@ public class UsersList extends AppCompatActivity implements UserAdapter.OnUserCl
             finish();
         });
 
-          rv=findViewById(R.id.user_recycler_view);
+        rv=findViewById(R.id.user_recycler_view);
         rv.setLayoutManager(new LinearLayoutManager(this));
 
         sp=getApplicationContext().getSharedPreferences("AdminPrefs",MODE_PRIVATE);

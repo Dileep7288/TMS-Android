@@ -227,8 +227,6 @@ public class DashBoardActivity extends AppCompatActivity implements TaskAdapter.
         calendar.set(Calendar.MILLISECOND, 0);
     }
 
-
-
     private boolean isAdmin() {
         SharedPreferences sharedPreferences = getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
         return sharedPreferences.getBoolean("is_admin", false);
